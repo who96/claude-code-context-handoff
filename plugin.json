@@ -1,0 +1,55 @@
+{
+  "name": "context-handoff",
+  "version": "1.0.0",
+  "displayName": "Context Handoff",
+  "description": "Automatic context preservation for Claude Code. Prevents intelligence degradation after auto-compaction.",
+  "author": "Your Name",
+  "repository": "https://github.com/YOUR_USERNAME/claude-code-context-handoff",
+  "license": "MIT",
+  "engines": {
+    "claudeCode": ">=2.0.0"
+  },
+  "hooks": {
+    "PreCompact": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/pre-compact-handoff.py",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/session-restore.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "configuration": {
+    "maxUserMessages": {
+      "type": "number",
+      "default": 15,
+      "description": "Maximum number of user messages to preserve"
+    },
+    "maxAssistantChars": {
+      "type": "number",
+      "default": 800,
+      "description": "Maximum characters per assistant snippet"
+    },
+    "deduplicationThreshold": {
+      "type": "number",
+      "default": 0.85,
+      "description": "Similarity threshold for message deduplication (0.0-1.0)"
+    }
+  }
+}
