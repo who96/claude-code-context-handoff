@@ -35,3 +35,4 @@ test-output/
 dist/
 build/
 *.egg-info/
+SOCIAL_MEDIA_POSTS.md
