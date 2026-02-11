@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-02-11
+
+### Added
+- `SessionEnd(clear)` hook to persist handoff before `/clear` teardown
+- `SessionStart(clear)` restore support (in addition to `compact`)
+- Shared `hooks/handoff_core.py` for extraction + file writing logic
+- `latest-handoff.md` and `latest-handoff.json` fallback pointer files
+- `scripts/claude-handoff-supervisor.py` external controller to rewrite manual `/compact` -> `/clear`
+
+### Changed
+- `session-restore.sh` now falls back to `latest-handoff.md` for clear-start sessions
+- `session-restore.sh` fallback is now guarded by `cwd` match + max-age window
+- Installer/uninstaller now manage SessionEnd hook and supervisor binary
+- Test suite updated for clear transition coverage
+- Supervisor now forwards unknown CLI args directly to Claude (no required `--` delimiter)
+- `plugin.json` bumped to `1.1.0`
+
 ## [1.0.0] - 2026-02-11
 
 ### Added

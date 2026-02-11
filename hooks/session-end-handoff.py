@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-PreCompact Hook: Extract key context before auto-compact or /compact.
-Writes a handoff document so post-compact session can recover critical info.
+SessionEnd Hook: capture context right before /clear tears down the session.
 """
 
 import json
@@ -10,17 +9,20 @@ import sys
 from handoff_core import extract_context, write_handoff
 
 
-def main():
+def main() -> None:
     try:
         data = json.load(sys.stdin)
     except (json.JSONDecodeError, EOFError):
         sys.exit(0)
 
+    # Usually this hook is matcher-scoped to "clear", but keep a defensive check.
+    source = data.get("source", "")
+    if source and source != "clear":
+        sys.exit(0)
+
     session_id = data.get("session_id", "unknown")
     transcript_path = data.get("transcript_path", "")
-    trigger = data.get("trigger", "PreCompact (auto-compact or /compact)")
     source_cwd = data.get("cwd", "")
-
     if not transcript_path:
         sys.exit(0)
 
@@ -31,18 +33,16 @@ def main():
     handoff_result = write_handoff(
         context=context,
         session_id=session_id,
-        trigger=trigger,
+        trigger="SessionEnd(clear)",
         transcript_path=transcript_path,
         source_cwd=source_cwd,
     )
 
-    # Output JSON for Claude Code to inject as system message
     output = {
         "systemMessage": (
-            f"[PreCompact Handoff] Context snapshot saved to {handoff_result['handoff_file']}. "
-            f"Captured {len(context['user_messages'])} user messages and "
-            f"{len(context['files_touched'])} file references. "
-            f"Updated latest handoff at {handoff_result['latest_handoff_file']}."
+            "[SessionEnd Handoff] Saved clear-transition snapshot to "
+            f"{handoff_result['handoff_file']}; latest pointer: "
+            f"{handoff_result['latest_handoff_file']}."
         )
     }
     print(json.dumps(output))

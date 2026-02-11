@@ -1,8 +1,8 @@
 {
   "name": "context-handoff",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "displayName": "Context Handoff",
-  "description": "Automatic context preservation for Claude Code. Prevents intelligence degradation after auto-compaction.",
+  "description": "Automatic context preservation for Claude Code with clear-transition handoff support.",
   "author": "Your Name",
   "repository": "https://github.com/YOUR_USERNAME/claude-code-context-handoff",
   "license": "MIT",
@@ -16,8 +16,20 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/pre-compact-handoff.py",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/pre-compact-handoff.py",
             "timeout": 30
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/session-end-handoff.py",
+            "timeout": 20
           }
         ]
       }
@@ -25,6 +37,16 @@
     "SessionStart": [
       {
         "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/session-restore.sh",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "clear",
         "hooks": [
           {
             "type": "command",
